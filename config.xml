@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<username>username</username>
+	<password>password</password>
+	<clientId>clientApplicationID</clientId>
+	<clientSecret>secret</clientSecret>
+	<userAgent>windows:v1.0.0 (by /u/username)</userAgent>
+	<threadsPerRequest>100</threadsPerRequest>
+	<requestInterval>5000</requestInterval>
+	<popUpX>-1900</popUpX>
+	<popUpY>700</popUpY>
+</configuration>
