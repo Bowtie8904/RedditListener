@@ -22,7 +22,7 @@ public class ModQueueMessage extends RedditThread
         this.id = data.getString("name");
         this.created = data.getLong("created_utc") * 1000;
 
-        this.title = "New item in ModQueue";
+        this.title = "New item in the queue";
         this.createdString = new Timestamp(getCreated()).toString();
         this.link = "https://www.reddit.com" + data.getString("permalink");
     }

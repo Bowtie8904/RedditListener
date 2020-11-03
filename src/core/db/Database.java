@@ -1,20 +1,18 @@
 package core.db;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import bt.db.EmbeddedDatabase;
+import bt.db.constants.Delete;
 import bt.db.constants.Generated;
 import bt.db.constants.SqlType;
 import bt.db.listener.impl.IdentityListener;
 import bt.db.statement.clause.Column;
-import bt.log.Logger;
+import bt.db.statement.clause.foreign.ColumnForeignKey;
 import core.obj.*;
 
 /**
  * @author &#8904
- *
  */
 public class Database extends EmbeddedDatabase
 {
@@ -33,66 +31,88 @@ public class Database extends EmbeddedDatabase
                 .createDefaultUpdateTrigger(false)
                 .createDefaultDeleteTrigger(false)
                 .onAlreadyExists((stmt, e) ->
-                {
-                    System.out.println("Table " + stmt.getName() + " already exists.");
-                    System.out.println("Execution time: " + stmt.getExecutionTime());
-                    return 0;
-                })
+                                 {
+                                     System.out.println("Table " + stmt.getName() + " already exists.");
+                                     System.out.println("Execution time: " + stmt.getExecutionTime());
+                                     return 0;
+                                 })
                 .onSuccess((stmt, e) ->
-                {
-                    System.out.println("Created table " + stmt.getName() + ".");
-                    System.out.println("Execution time: " + stmt.getExecutionTime());
-                })
+                           {
+                               System.out.println("Created table " + stmt.getName() + ".");
+                               System.out.println("Execution time: " + stmt.getExecutionTime());
+                           })
+                .execute();
+
+        create().table("ModQueueMessage")
+                .column(new Column("name", SqlType.VARCHAR).size(200).unique())
+                .column(new Column("subreddit_id", SqlType.LONG).foreignKey(new ColumnForeignKey().references("RedditObservable", "id")
+                                                                                                  .on(Delete.CASCADE)))
+                .createDefaultUpdateTrigger(false)
+                .createDefaultDeleteTrigger(false)
+                .onAlreadyExists((stmt, e) ->
+                                 {
+                                     System.out.println("Table " + stmt.getName() + " already exists.");
+                                     System.out.println("Execution time: " + stmt.getExecutionTime());
+                                     return 0;
+                                 })
+                .onSuccess((stmt, e) ->
+                           {
+                               System.out.println("Created table " + stmt.getName() + ".");
+                               System.out.println("Execution time: " + stmt.getExecutionTime());
+                           })
                 .execute();
     }
 
     public List<RedditObservable> load()
     {
-        List<RedditObservable> observables = new ArrayList<>();
+        List<RedditObservable> observables = select().from("RedditObservable")
+                                                     .orderBy("name").asc()
+                                                     .execute()
+                                                     .map(result ->
+                                                          {
+                                                              RedditObservable obs = null;
 
-        select().from("RedditObservable")
-                .orderBy("name").asc()
-                .executeAsStream()
-                .stream()
-                .forEach(result ->
-                {
-                    try
-                    {
-                        RedditObservable obs = null;
+                                                              Long id = result.getLong("id");
+                                                              String name = result.getString("name");
+                                                              Long lastThreadTimestamp = result.getLong("lastThreadTimestamp");
+                                                              String type = result.getString("type");
 
-                        Long id = result.getLong("id");
-                        String name = result.getString("name");
-                        Long lastThreadTimestamp = result.getLong("lastThreadTimestamp");
-                        String type = result.getString("type");
+                                                              switch (type.trim())
+                                                              {
+                                                                  case "user":
+                                                                      obs = new RedditUser(name);
+                                                                      break;
+                                                                  case "subreddit":
+                                                                      obs = new Subreddit(name);
+                                                                      break;
+                                                                  case "inbox":
+                                                                      obs = new RedditInbox(name);
+                                                                      break;
+                                                                  case "modqueue":
+                                                                      obs = new ModQueue(name);
+                                                                      break;
+                                                              }
 
-                        switch (type.trim())
-                        {
-                            case "user":
-                                obs = new RedditUser(name);
-                                break;
-                            case "subreddit":
-                                obs = new Subreddit(name);
-                                break;
-                            case "inbox":
-                                obs = new RedditInbox(name);
-                                break;
-                            case "modqueue":
-                                obs = new ModQueue();
-                                break;
-                        }
+                                                              obs.setDbId(id);
+                                                              obs.setLastThreadTimestamp(lastThreadTimestamp);
 
-                        obs.setDbId(id);
-                        obs.setLastThreadTimestamp(lastThreadTimestamp);
+                                                              if (obs instanceof ModQueue)
+                                                              {
+                                                                  ((ModQueue)obs).addMessages(loadModQueueMessages((ModQueue)obs));
+                                                              }
 
-                        observables.add(obs);
-                    }
-                    catch (SQLException e)
-                    {
-                        Logger.global().print(e);
-                    }
-                });
+                                                              return obs;
+                                                          });
 
         return observables;
+    }
+
+    public List<String> loadModQueueMessages(ModQueue queue)
+    {
+        return select().from("ModQueueMessage")
+                       .where("subreddit_id").equal(queue.getDbId())
+                       .execute()
+                       .map(rs -> rs.getString("name"));
     }
 
     public void delete(RedditObservable obs)
@@ -113,6 +133,10 @@ public class Database extends EmbeddedDatabase
             {
                 type = "user";
             }
+            else if (obs instanceof ModQueue)
+            {
+                type = "modqueue";
+            }
             else if (obs instanceof Subreddit)
             {
                 type = "subreddit";
@@ -120,10 +144,6 @@ public class Database extends EmbeddedDatabase
             else if (obs instanceof RedditInbox)
             {
                 type = "inbox";
-            }
-            else if (obs instanceof ModQueue)
-            {
-                type = "modqueue";
             }
 
             insert().into("RedditObservable")
@@ -144,5 +164,27 @@ public class Database extends EmbeddedDatabase
                                       .commit()
                                       .execute();
         }
+
+        if (obs instanceof ModQueue)
+        {
+            saveModQueueMessages((ModQueue)obs);
+        }
+    }
+
+    public void saveModQueueMessages(ModQueue queue)
+    {
+        delete().from("ModQueueMessage")
+                .where("subreddit_id").equal(queue.getDbId())
+                .execute();
+
+        for (var msg : queue.getMessages())
+        {
+            insert().into("ModQueueMessage")
+                    .set("name", msg)
+                    .set("subreddit_id", queue.getDbId())
+                    .execute();
+        }
+
+        commit();
     }
 }

@@ -26,10 +26,7 @@ import bt.gui.fx.core.tray.DefaultFxSystemTrayScreen;
 import bt.gui.fx.util.ButtonHandling;
 import core.config.css.ButtonCss;
 import core.config.css.TextFieldCss;
-import core.obj.ObservableManager;
-import core.obj.RedditObservable;
-import core.obj.RedditUser;
-import core.obj.Subreddit;
+import core.obj.*;
 import core.view.comp.ObservableListCell;
 import core.web.RedditApplication;
 import javafx.application.HostServices;
@@ -138,6 +135,9 @@ public class MainScreen extends DefaultFxSystemTrayScreen
             case "/u/":
                 this.observableManager.addObservable(new RedditUser(this.textField.getText()));
                 break;
+            case "/mod/":
+                this.observableManager.addObservable(new ModQueue(this.textField.getText()));
+                break;
         }
 
         this.saveButton.setDisable(true);
@@ -203,7 +203,7 @@ public class MainScreen extends DefaultFxSystemTrayScreen
     @Override
     protected void prepareScreen()
     {
-        this.kindDropDown.setItems(FXCollections.observableArrayList("/r/", "/u/"));
+        this.kindDropDown.setItems(FXCollections.observableArrayList("/r/", "/u/", "/mod/"));
         this.kindDropDown.getSelectionModel().select(0);
 
         RedditApplication.remainingRateLimit.addListener((obs, ol, ne) ->

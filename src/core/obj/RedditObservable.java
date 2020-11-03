@@ -76,7 +76,7 @@ public abstract class RedditObservable
 
             for (var t : threads)
             {
-                if (t.getCreated() > this.lastThreadTimestamp)
+                if (shouldFireNewThread(t))
                 {
                     fireNewThread(t);
                     count ++ ;
@@ -97,6 +97,11 @@ public abstract class RedditObservable
         {
             Logger.global().print(e);
         }
+    }
+
+    protected boolean shouldFireNewThread(RedditThread t)
+    {
+        return t.getCreated() > this.lastThreadTimestamp;
     }
 
     protected RedditThread createThread()

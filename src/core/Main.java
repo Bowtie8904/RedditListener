@@ -32,6 +32,8 @@ public class Main
         config.setDatabase(new Database());
         config.load(new File("./config.xml"));
 
+        config.getDatabase().setLogCommit(false);
+
         try
         {
             config.getDatabase().setupQueryServer("RedditListener", config.getPort());
@@ -60,16 +62,6 @@ public class Main
             if (!hasInbox)
             {
                 config.getObservableManager().addObservable(new RedditInbox("Inbox"));
-            }
-
-            boolean hasMod = config.getObservableManager()
-                                     .observables()
-                                     .stream()
-                                     .anyMatch(obs -> obs instanceof ModQueue);
-
-            if (!hasMod)
-            {
-                config.getObservableManager().addObservable(new ModQueue());
             }
 
             app.startScheduler();
