@@ -8,6 +8,7 @@ import bt.log.Logger;
 import core.config.Configuration;
 import core.db.Database;
 import core.msg.ApplicationStarted;
+import core.obj.ModQueue;
 import core.obj.ObservableManager;
 import core.obj.RedditInbox;
 import core.view.ScreenManager;
@@ -59,6 +60,16 @@ public class Main
             if (!hasInbox)
             {
                 config.getObservableManager().addObservable(new RedditInbox("Inbox"));
+            }
+
+            boolean hasMod = config.getObservableManager()
+                                     .observables()
+                                     .stream()
+                                     .anyMatch(obs -> obs instanceof ModQueue);
+
+            if (!hasMod)
+            {
+                config.getObservableManager().addObservable(new ModQueue());
             }
 
             app.startScheduler();

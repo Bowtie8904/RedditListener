@@ -10,10 +10,7 @@ import bt.db.constants.SqlType;
 import bt.db.listener.impl.IdentityListener;
 import bt.db.statement.clause.Column;
 import bt.log.Logger;
-import core.obj.RedditInbox;
-import core.obj.RedditObservable;
-import core.obj.RedditUser;
-import core.obj.Subreddit;
+import core.obj.*;
 
 /**
  * @author &#8904
@@ -79,6 +76,9 @@ public class Database extends EmbeddedDatabase
                             case "inbox":
                                 obs = new RedditInbox(name);
                                 break;
+                            case "modqueue":
+                                obs = new ModQueue();
+                                break;
                         }
 
                         obs.setDbId(id);
@@ -120,6 +120,10 @@ public class Database extends EmbeddedDatabase
             else if (obs instanceof RedditInbox)
             {
                 type = "inbox";
+            }
+            else if (obs instanceof ModQueue)
+            {
+                type = "modqueue";
             }
 
             insert().into("RedditObservable")
