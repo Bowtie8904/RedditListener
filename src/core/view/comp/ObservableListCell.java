@@ -12,7 +12,7 @@ import bt.gui.fx.core.comp.ButtonListCell;
 import bt.gui.fx.util.ButtonHandling;
 import core.config.css.ButtonCss;
 import core.obj.ObservableManager;
-import core.obj.RedditObservable;
+import core.obj.obs.RedditObservable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 
@@ -40,7 +40,7 @@ public class ObservableListCell extends ButtonListCell<RedditObservable>
         {
             manager.observables().remove(item);
             list.getItems().remove(this);
-            manager.getConfig().getDatabase().delete(item);
+            item.onDelete();
         });
 
         this.delete.setAlignment(Pos.CENTER_RIGHT);

@@ -1,4 +1,4 @@
-package core.obj;
+package core.obj.obs;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+import core.obj.notif.RedditNotification;
+import core.obj.notif.RedditThreadNotification;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import bt.log.Logger;
@@ -23,7 +26,7 @@ public abstract class RedditObservable
     protected String name;
     protected String lastId;
     protected long nextRequest;
-    protected List<Consumer<RedditThread>> listeners;
+    protected List<Consumer<RedditNotification>> listeners;
     protected boolean isFirstRequest = true;
     protected long lastThreadTimestamp;
 
@@ -34,64 +37,51 @@ public abstract class RedditObservable
         this.listeners = new CopyOnWriteArrayList<>();
     }
 
-    public void parseNewThreads(JSONObject json)
+    protected List<RedditNotification> extractNotifications(JSONArray json)
+    {
+        List<RedditNotification> notifications = new ArrayList<>(json.length());
+        JSONObject notificationData = null;
+        RedditNotification notification = null;
+
+        for (int i = 0; i < json.length(); i ++ )
+        {
+            notificationData = json.getJSONObject(i);
+            notification = createNotification();
+            notification.parse(notificationData);
+            notifications.add(0, notification);
+        }
+
+        return notifications;
+    }
+
+    public void parseNewNotifications(JSONObject json)
     {
         try
         {
             var data = json.getJSONObject("data");
-
             var children = data.getJSONArray("children");
-
-            List<RedditThread> threads = new ArrayList<>();
-
-            JSONObject threadData = null;
-            RedditThread thread = null;
             long lastTimestamp = System.currentTimeMillis();
+            List<RedditNotification> notifications = extractNotifications(children);
 
-            for (int i = 0; i < children.length(); i ++ )
+            notifications.sort(Comparator.comparing(RedditNotification::getCreated));
+
+            if (notifications.size() > 0)
             {
-                threadData = children.getJSONObject(i);
-                thread = createThread();
-                thread.parse(threadData);
-                threads.add(0, thread);
+                RedditNotification thread = notifications.get(notifications.size() - 1);
+                this.lastId = thread.getId();
+                lastTimestamp = thread.getCreated();
             }
 
-            threads.sort(Comparator.comparing(RedditThread::getCreated).reversed());
-            int lastThreadIndex = 0;
+            int count = firenewNotifications(notifications);
 
-            for (int i = 0; i < threads.size(); i ++ )
-            {
-                thread = threads.get(i);
-
-                if (i == lastThreadIndex)
-                {
-                    this.lastId = thread.getId();
-                    lastTimestamp = thread.getCreated();
-                }
-            }
-
-            threads.sort(Comparator.comparing(RedditThread::getCreated));
-
-            int count = 0;
-
-            for (var t : threads)
-            {
-                if (shouldFireNewThread(t))
-                {
-                    fireNewThread(t);
-                    count ++ ;
-                }
-            }
+            this.lastThreadTimestamp = lastTimestamp;
 
             if (count > 0)
             {
-                Logger.global().print(toString() + ": Found " + count + " new threads.");
+                Logger.global().print(toString() + ": Found " + count + " new notifications.");
             }
 
-            this.lastThreadTimestamp = lastTimestamp;
-            this.config.getDatabase().save(this);
-
-            this.isFirstRequest = false;
+            afterFiring(notifications);
         }
         catch (Exception e)
         {
@@ -99,27 +89,54 @@ public abstract class RedditObservable
         }
     }
 
-    protected boolean shouldFireNewThread(RedditThread t)
+    protected void afterFiring(List<RedditNotification> notifications)
     {
-        return t.getCreated() > this.lastThreadTimestamp;
+        this.config.getDatabase().save(this);
+        this.isFirstRequest = false;
     }
 
-    protected RedditThread createThread()
+    protected int firenewNotifications(List<RedditNotification> notifications)
     {
-        return new RedditThread(this);
+        int count = 0;
+
+        for (var n : notifications)
+        {
+            if (shouldFireNewNotification(n))
+            {
+                fireNewNotification(n);
+                count ++ ;
+            }
+        }
+
+        return count;
     }
 
-    public synchronized void fireNewThread(RedditThread thread)
+    protected boolean shouldFireNewNotification(RedditNotification n)
+    {
+        return n.getCreated() > this.lastThreadTimestamp;
+    }
+
+    protected RedditNotification createNotification()
+    {
+        return new RedditThreadNotification(this);
+    }
+
+    public synchronized void fireNewNotification(RedditNotification notification)
     {
         for (var c : this.listeners)
         {
-            c.accept(thread);
+            c.accept(notification);
         }
     }
 
-    public synchronized void addListener(Consumer<RedditThread> c)
+    public synchronized void addListener(Consumer<RedditNotification> c)
     {
         this.listeners.add(c);
+    }
+
+    public void onDelete()
+    {
+        this.config.getDatabase().delete(this);
     }
 
     /**

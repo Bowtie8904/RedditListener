@@ -9,7 +9,7 @@ import bt.db.constants.SqlType;
 import bt.db.listener.impl.IdentityListener;
 import bt.db.statement.clause.Column;
 import bt.db.statement.clause.foreign.ColumnForeignKey;
-import core.obj.*;
+import core.obj.obs.*;
 
 /**
  * @author &#8904
@@ -24,7 +24,7 @@ public class Database extends EmbeddedDatabase
     {
         create().table("RedditObservable")
                 .column(new Column("id", SqlType.LONG).primaryKey().generated(Generated.ALWAYS).asIdentity())
-                .column(new Column("name", SqlType.VARCHAR).size(200).unique())
+                .column(new Column("name", SqlType.VARCHAR).size(200))
                 .column(new Column("lastThreadId", SqlType.VARCHAR).size(20))
                 .column(new Column("lastThreadTimestamp", SqlType.LONG))
                 .column(new Column("type", SqlType.VARCHAR).size(20))
@@ -80,25 +80,25 @@ public class Database extends EmbeddedDatabase
                                                               switch (type.trim())
                                                               {
                                                                   case "user":
-                                                                      obs = new RedditUser(name);
+                                                                      obs = new RedditUserObservable(name);
                                                                       break;
                                                                   case "subreddit":
-                                                                      obs = new Subreddit(name);
+                                                                      obs = new SubredditObservable(name);
                                                                       break;
                                                                   case "inbox":
-                                                                      obs = new RedditInbox(name);
+                                                                      obs = new RedditInboxObservable(name);
                                                                       break;
                                                                   case "modqueue":
-                                                                      obs = new ModQueue(name);
+                                                                      obs = new ModQueueObservable(name);
                                                                       break;
                                                               }
 
                                                               obs.setDbId(id);
                                                               obs.setLastThreadTimestamp(lastThreadTimestamp);
 
-                                                              if (obs instanceof ModQueue)
+                                                              if (obs instanceof ModQueueObservable)
                                                               {
-                                                                  ((ModQueue)obs).addMessages(loadModQueueMessages((ModQueue)obs));
+                                                                  ((ModQueueObservable)obs).addMessages(loadModQueueMessages((ModQueueObservable)obs));
                                                               }
 
                                                               return obs;
@@ -107,11 +107,12 @@ public class Database extends EmbeddedDatabase
         return observables;
     }
 
-    public List<String> loadModQueueMessages(ModQueue queue)
+    public List<String> loadModQueueMessages(ModQueueObservable queue)
     {
         return select().from("ModQueueMessage")
                        .where("subreddit_id").equal(queue.getDbId())
-                       .execute()
+                       .unprepared()
+                       .execute(true)
                        .map(rs -> rs.getString("name"));
     }
 
@@ -129,19 +130,19 @@ public class Database extends EmbeddedDatabase
         {
             String type = "";
 
-            if (obs instanceof RedditUser)
+            if (obs instanceof RedditUserObservable)
             {
                 type = "user";
             }
-            else if (obs instanceof ModQueue)
+            else if (obs instanceof ModQueueObservable)
             {
                 type = "modqueue";
             }
-            else if (obs instanceof Subreddit)
+            else if (obs instanceof SubredditObservable)
             {
                 type = "subreddit";
             }
-            else if (obs instanceof RedditInbox)
+            else if (obs instanceof RedditInboxObservable)
             {
                 type = "inbox";
             }
@@ -150,8 +151,9 @@ public class Database extends EmbeddedDatabase
                     .set("name", obs.getName())
                     .set("lastThreadTimestamp", obs.getLastThreadTimestamp())
                     .set("type", type)
+                    .unprepared()
                     .commit()
-                    .execute();
+                    .execute(true);
 
             obs.setDbId(IdentityListener.getLast("RedditObservable"));
         }
@@ -161,28 +163,31 @@ public class Database extends EmbeddedDatabase
                                       .set("lastThreadId", obs.getLastId())
                                       .set("lastThreadTimestamp", obs.getLastThreadTimestamp())
                                       .where("id").equal(obs.getDbId())
+                                      .unprepared()
                                       .commit()
-                                      .execute();
+                                      .execute(true);
         }
 
-        if (obs instanceof ModQueue)
+        if (obs instanceof ModQueueObservable)
         {
-            saveModQueueMessages((ModQueue)obs);
+            saveModQueueMessages((ModQueueObservable)obs);
         }
     }
 
-    public void saveModQueueMessages(ModQueue queue)
+    public void saveModQueueMessages(ModQueueObservable queue)
     {
         delete().from("ModQueueMessage")
                 .where("subreddit_id").equal(queue.getDbId())
-                .execute();
+                .unprepared()
+                .execute(true);
 
         for (var msg : queue.getMessages())
         {
             insert().into("ModQueueMessage")
                     .set("name", msg)
                     .set("subreddit_id", queue.getDbId())
-                    .execute();
+                    .unprepared()
+                    .execute(true);
         }
 
         commit();

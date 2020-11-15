@@ -1,24 +1,25 @@
-package core.obj;
+package core.obj.obs;
 
 import bt.remote.rest.REST;
+import core.obj.obs.RedditObservable;
 
 /**
  * @author &#8904
  *
  */
-public class RedditUser extends RedditObservable
+public class SubredditObservable extends RedditObservable
 {
     /**
      * @param name
      */
-    public RedditUser(String name)
+    public SubredditObservable(String name)
     {
         super(name);
-        this.namePrefix = "/u/";
+        this.namePrefix = "/r/";
     }
 
     /**
-     * @see core.obj.RedditObservable#createRequestParameters()
+     * @see RedditObservable#createRequestParameters()
      */
     @Override
     public String[] createRequestParameters()
@@ -32,20 +33,20 @@ public class RedditUser extends RedditObservable
     }
 
     /**
-     * @see core.obj.RedditObservable#getRequestUrl()
+     * @see RedditObservable#getRequestUrl()
      */
     @Override
     public String getRequestUrl()
     {
-        return "https://oauth.reddit.com/user/" + getName() + "/submitted";
+        return "https://oauth.reddit.com/r/" + getName() + "/new";
     }
 
     /**
-     * @see core.obj.RedditObservable#getLink()
+     * @see RedditObservable#getLink()
      */
     @Override
     public String getLink()
     {
-        return "https://www.reddit.com/user/" + this.name + "/posts/";
+        return "https://www.reddit.com/r/" + this.name + "/new/";
     }
 }

@@ -8,9 +8,8 @@ import bt.log.Logger;
 import core.config.Configuration;
 import core.db.Database;
 import core.msg.ApplicationStarted;
-import core.obj.ModQueue;
 import core.obj.ObservableManager;
-import core.obj.RedditInbox;
+import core.obj.obs.RedditInboxObservable;
 import core.view.ScreenManager;
 import core.web.RedditApplication;
 
@@ -57,11 +56,11 @@ public class Main
             boolean hasInbox = config.getObservableManager()
                                      .observables()
                                      .stream()
-                                     .anyMatch(obs -> obs instanceof RedditInbox);
+                                     .anyMatch(obs -> obs instanceof RedditInboxObservable);
 
             if (!hasInbox)
             {
-                config.getObservableManager().addObservable(new RedditInbox("Inbox"));
+                config.getObservableManager().addObservable(new RedditInboxObservable("Inbox"));
             }
 
             app.startScheduler();

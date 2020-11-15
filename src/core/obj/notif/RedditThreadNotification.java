@@ -1,29 +1,28 @@
-package core.obj;
+package core.obj.notif;
 
 import java.sql.Timestamp;
 
+import core.obj.notif.RedditNotification;
+import core.obj.obs.RedditObservable;
 import org.json.JSONObject;
 
 /**
  * @author &#8904
  *
  */
-public class RedditThread
+public class RedditThreadNotification extends RedditNotification
 {
-    protected RedditObservable observable;
-    protected long created;
-    protected String id;
     protected String title;
     protected String text;
-    protected String link;
     protected boolean isPinned;
     protected String createdString;
 
-    public RedditThread(RedditObservable sub)
+    public RedditThreadNotification(RedditObservable obs)
     {
-        this.observable = sub;
+        super(obs);
     }
 
+    @Override
     public void parse(JSONObject json)
     {
         var data = json.getJSONObject("data");
@@ -52,31 +51,6 @@ public class RedditThread
     public void setPinned(boolean isPinned)
     {
         this.isPinned = isPinned;
-    }
-
-    /**
-     * @return the link
-     */
-    public String getLink()
-    {
-        return this.link;
-    }
-
-    /**
-     * @param link
-     *            the link to set
-     */
-    public void setLink(String link)
-    {
-        this.link = link;
-    }
-
-    /**
-     * @return the subreddit
-     */
-    public RedditObservable getObservable()
-    {
-        return this.observable;
     }
 
     /**
@@ -111,40 +85,6 @@ public class RedditThread
     public void setTitle(String title)
     {
         this.title = title;
-    }
-
-    /**
-     * @return the created
-     */
-    public long getCreated()
-    {
-        return this.created;
-    }
-
-    /**
-     * @param created
-     *            the created to set
-     */
-    public void setCreated(long created)
-    {
-        this.created = created;
-    }
-
-    /**
-     * @return the id
-     */
-    public String getId()
-    {
-        return this.id;
-    }
-
-    /**
-     * @param id
-     *            the id to set
-     */
-    public void setId(String id)
-    {
-        this.id = id;
     }
 
     @Override

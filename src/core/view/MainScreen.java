@@ -27,6 +27,10 @@ import bt.gui.fx.util.ButtonHandling;
 import core.config.css.ButtonCss;
 import core.config.css.TextFieldCss;
 import core.obj.*;
+import core.obj.obs.ModQueueObservable;
+import core.obj.obs.RedditObservable;
+import core.obj.obs.RedditUserObservable;
+import core.obj.obs.SubredditObservable;
 import core.view.comp.ObservableListCell;
 import core.web.RedditApplication;
 import javafx.application.HostServices;
@@ -130,13 +134,13 @@ public class MainScreen extends DefaultFxSystemTrayScreen
         switch (this.kindDropDown.getSelectionModel().getSelectedItem())
         {
             case "/r/":
-                this.observableManager.addObservable(new Subreddit(this.textField.getText()));
+                this.observableManager.addObservable(new SubredditObservable(this.textField.getText()));
                 break;
             case "/u/":
-                this.observableManager.addObservable(new RedditUser(this.textField.getText()));
+                this.observableManager.addObservable(new RedditUserObservable(this.textField.getText()));
                 break;
             case "/mod/":
-                this.observableManager.addObservable(new ModQueue(this.textField.getText()));
+                this.observableManager.addObservable(new ModQueueObservable(this.textField.getText()));
                 break;
         }
 

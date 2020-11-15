@@ -11,15 +11,15 @@ import bt.gui.fx.core.annot.setup.FxSetup;
 import bt.gui.fx.core.comp.ButtonListCell;
 import bt.gui.fx.util.ButtonHandling;
 import core.config.css.ButtonCss;
-import core.obj.RedditThread;
-import core.view.NewThreadListScreen;
+import core.obj.notif.RedditNotification;
+import core.view.NewNotificationListScreen;
 import javafx.scene.control.Button;
 
 /**
  * @author &#8904
  *
  */
-public class RedditThreadListCell extends ButtonListCell<RedditThread>
+public class RedditNotificationListCell extends ButtonListCell<RedditNotification>
 {
     @FxSetup(css = ButtonCss.BLUE_BACKGROUND)
     @FxHandler(type = FxOnMouseEntered.class, methodClass = ButtonHandling.class, method = "onMouseEnter", withParameters = false, passField = true)
@@ -30,7 +30,7 @@ public class RedditThreadListCell extends ButtonListCell<RedditThread>
      * @param item
      * @param buttons
      */
-    public RedditThreadListCell(RedditThread item, NewThreadListScreen screen, JFXListView<RedditThreadListCell> list, Button... buttons)
+    public RedditNotificationListCell(RedditNotification item, NewNotificationListScreen screen, JFXListView<RedditNotificationListCell> list, Button... buttons)
     {
         super(item, buttons);
 

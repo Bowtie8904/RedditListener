@@ -1,6 +1,7 @@
 package core.obj;
 
 import core.config.Configuration;
+import core.obj.obs.RedditObservable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 

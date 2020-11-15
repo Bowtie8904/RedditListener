@@ -16,7 +16,7 @@ import bt.remote.rest.REST;
 import bt.scheduler.Threads;
 import core.config.Configuration;
 import core.obj.ObservableManager;
-import core.obj.RedditObservable;
+import core.obj.obs.RedditObservable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -154,7 +154,7 @@ public class RedditApplication
                 {
                     var json = REST.GET(obs.getRequestUrl(), headers, obs.createRequestParameters());
 
-                    obs.parseNewThreads(json);
+                    obs.parseNewNotifications(json);
                     obs.setNextRequest(System.currentTimeMillis() + this.config.getRequestInterval());
 
                     evaluateRateLimit(Double.parseDouble(headers.get("x-ratelimit-used")),

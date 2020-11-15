@@ -1,15 +1,19 @@
-package core.obj;
+package core.obj.notif;
 
+import core.obj.obs.RedditObservable;
 import org.json.JSONObject;
 
 import java.sql.Timestamp;
 
-public class ModQueueMessage extends RedditThread
+public class ModQueueMessageNotification extends RedditNotification
 {
+    private String createdString;
+    private String title;
+
     /**
      * @param obs
      */
-    public ModQueueMessage(RedditObservable obs)
+    public ModQueueMessageNotification(RedditObservable obs)
     {
         super(obs);
     }
@@ -25,6 +29,23 @@ public class ModQueueMessage extends RedditThread
         this.title = "New item in the queue";
         this.createdString = new Timestamp(getCreated()).toString();
         this.link = "https://www.reddit.com" + data.getString("permalink");
+    }
+
+    /**
+     * @return the title
+     */
+    public String getTitle()
+    {
+        return this.title;
+    }
+
+    /**
+     * @param title
+     *            the title to set
+     */
+    public void setTitle(String title)
+    {
+        this.title = title;
     }
 
     @Override

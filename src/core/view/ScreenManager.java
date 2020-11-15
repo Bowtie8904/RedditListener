@@ -8,8 +8,8 @@ import bt.log.Logger;
 import core.config.Configuration;
 import core.msg.ApplicationStarted;
 import core.obj.ObservableManager;
-import core.obj.RedditObservable;
-import core.obj.RedditThread;
+import core.obj.notif.RedditNotification;
+import core.obj.obs.RedditObservable;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener.Change;
 import javafx.stage.Stage;
@@ -51,17 +51,17 @@ public class ScreenManager extends FxScreenManager
         }
     }
 
-    public synchronized void onNewThread(RedditThread thread)
+    public synchronized void onNewThread(RedditNotification thread)
     {
         Platform.runLater(() ->
         {
-            var screen = getScreen(NewThreadListScreen.class, false);
+            var screen = getScreen(NewNotificationListScreen.class, false);
 
             if (screen == null || !screen.isActive())
             {
-                screen = new NewThreadListScreen(getHostServices(), this.config.getX(), this.config.getY());
-                addScreen(NewThreadListScreen.class, screen);
-                setScreen(NewThreadListScreen.class, new Stage());
+                screen = new NewNotificationListScreen(getHostServices(), this.config.getX(), this.config.getY());
+                addScreen(NewNotificationListScreen.class, screen);
+                setScreen(NewNotificationListScreen.class, new Stage());
             }
 
             screen.addThread(thread);

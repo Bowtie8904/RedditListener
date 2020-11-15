@@ -1,24 +1,26 @@
-package core.obj;
+package core.obj.obs;
 
 import bt.remote.rest.REST;
+import core.obj.notif.RedditMessageNotification;
+import core.obj.notif.RedditNotification;
 
 /**
  * @author &#8904
  *
  */
-public class RedditInbox extends RedditObservable
+public class RedditInboxObservable extends RedditObservable
 {
     /**
      * @param name
      */
-    public RedditInbox(String name)
+    public RedditInboxObservable(String name)
     {
         super(name);
         this.namePrefix = "";
     }
 
     /**
-     * @see core.obj.RedditObservable#createRequestParameters()
+     * @see RedditObservable#createRequestParameters()
      */
     @Override
     public String[] createRequestParameters()
@@ -32,13 +34,13 @@ public class RedditInbox extends RedditObservable
     }
 
     @Override
-    protected RedditThread createThread()
+    protected RedditNotification createNotification()
     {
-        return new RedditMessage(this);
+        return new RedditMessageNotification(this);
     }
 
     /**
-     * @see core.obj.RedditObservable#getRequestUrl()
+     * @see RedditObservable#getRequestUrl()
      */
     @Override
     public String getRequestUrl()
@@ -47,7 +49,7 @@ public class RedditInbox extends RedditObservable
     }
 
     /**
-     * @see core.obj.RedditObservable#getLink()
+     * @see RedditObservable#getLink()
      */
     @Override
     public String getLink()

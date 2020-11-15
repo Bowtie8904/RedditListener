@@ -29,8 +29,8 @@ import bt.log.Logger;
 import bt.scheduler.Threads;
 import core.config.css.ButtonCss;
 import core.config.css.TextFieldCss;
-import core.obj.RedditThread;
-import core.view.comp.RedditThreadListCell;
+import core.obj.notif.RedditNotification;
+import core.view.comp.RedditNotificationListCell;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -46,11 +46,11 @@ import javafx.stage.Stage;
  */
 @FxStyleClass(ButtonCss.class)
 @FxStyleClass(TextFieldCss.class)
-public class NewThreadListScreen extends FxScreen
+public class NewNotificationListScreen extends FxScreen
 {
     @FxmlElement
     @FxHandler(type = FxOnMouseClicked.class, method = "onThreadClicked")
-    private JFXListView<RedditThreadListCell> list;
+    private JFXListView<RedditNotificationListCell> list;
 
     @FxmlElement
     @FxSetup(css = ButtonCss.BLUE_BACKGROUND)
@@ -65,7 +65,7 @@ public class NewThreadListScreen extends FxScreen
     private long lastIconUpdate = System.currentTimeMillis() - 5000;
     private volatile boolean iconUpdateScheduled;
 
-    public NewThreadListScreen(HostServices hostServices, int x, int y)
+    public NewNotificationListScreen(HostServices hostServices, int x, int y)
     {
         this.hostServices = hostServices;
         this.x = x;
@@ -73,7 +73,7 @@ public class NewThreadListScreen extends FxScreen
         this.active = true;
     }
 
-    public synchronized void addThread(RedditThread thread)
+    public synchronized void addThread(RedditNotification thread)
     {
         this.list.getItems().add(0, createListCell(thread));
 
@@ -85,7 +85,7 @@ public class NewThreadListScreen extends FxScreen
         this.list.refresh();
     }
 
-    private synchronized void onThreadsChange(Change<? extends RedditThreadListCell> c)
+    private synchronized void onThreadsChange(Change<? extends RedditNotificationListCell> c)
     {
         if (System.currentTimeMillis() - this.lastIconUpdate > 500 && !this.iconUpdateScheduled)
         {
@@ -110,9 +110,9 @@ public class NewThreadListScreen extends FxScreen
         this.list.getItems().clear();
     }
 
-    private RedditThreadListCell createListCell(RedditThread thread)
+    private RedditNotificationListCell createListCell(RedditNotification thread)
     {
-        return new RedditThreadListCell(thread, this, this.list);
+        return new RedditNotificationListCell(thread, this, this.list);
     }
 
     private void onThreadClicked(MouseEvent e)
