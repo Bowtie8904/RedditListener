@@ -21,7 +21,7 @@ public class ModQueueObservable extends RedditObservable
 
     public Set<String> getMessages()
     {
-        return messages;
+        return this.messages;
     }
 
     public void addMessages(List<String> messages)
@@ -68,6 +68,8 @@ public class ModQueueObservable extends RedditObservable
                 this.messages.remove(msg);
             }
         }
+
+        super.afterFiring(notifications);
     }
 
     @Override

@@ -61,6 +61,25 @@ public class Database extends EmbeddedDatabase
                                System.out.println("Execution time: " + stmt.getExecutionTime());
                            })
                 .execute();
+
+        create().table("ThreadComment")
+                .column(new Column("name", SqlType.VARCHAR).size(200))
+                .column(new Column("thread_id", SqlType.LONG).foreignKey(new ColumnForeignKey().references("RedditObservable", "id")
+                                                                                               .on(Delete.CASCADE)))
+                .createDefaultUpdateTrigger(false)
+                .createDefaultDeleteTrigger(false)
+                .onAlreadyExists((stmt, e) ->
+                                 {
+                                     System.out.println("Table " + stmt.getName() + " already exists.");
+                                     System.out.println("Execution time: " + stmt.getExecutionTime());
+                                     return 0;
+                                 })
+                .onSuccess((stmt, e) ->
+                           {
+                               System.out.println("Created table " + stmt.getName() + ".");
+                               System.out.println("Execution time: " + stmt.getExecutionTime());
+                           })
+                .execute();
     }
 
     public List<RedditObservable> load()
@@ -91,6 +110,9 @@ public class Database extends EmbeddedDatabase
                                                                   case "modqueue":
                                                                       obs = new ModQueueObservable(name);
                                                                       break;
+                                                                  case "thread":
+                                                                      obs = RedditThreadObservable.newFor(name);
+                                                                      break;
                                                               }
 
                                                               obs.setDbId(id);
@@ -99,6 +121,10 @@ public class Database extends EmbeddedDatabase
                                                               if (obs instanceof ModQueueObservable)
                                                               {
                                                                   ((ModQueueObservable)obs).addMessages(loadModQueueMessages((ModQueueObservable)obs));
+                                                              }
+                                                              else if (obs instanceof RedditThreadObservable)
+                                                              {
+                                                                  ((RedditThreadObservable)obs).addComments(loadThreadComments((RedditThreadObservable)obs));
                                                               }
 
                                                               return obs;
@@ -111,6 +137,15 @@ public class Database extends EmbeddedDatabase
     {
         return select().from("ModQueueMessage")
                        .where("subreddit_id").equal(queue.getDbId())
+                       .unprepared()
+                       .execute(true)
+                       .map(rs -> rs.getString("name"));
+    }
+
+    public List<String> loadThreadComments(RedditThreadObservable thread)
+    {
+        return select().from("ThreadComment")
+                       .where("thread_id").equal(thread.getDbId())
                        .unprepared()
                        .execute(true)
                        .map(rs -> rs.getString("name"));
@@ -146,6 +181,10 @@ public class Database extends EmbeddedDatabase
             {
                 type = "inbox";
             }
+            else if (obs instanceof RedditThreadObservable)
+            {
+                type = "thread";
+            }
 
             insert().into("RedditObservable")
                     .set("name", obs.getName())
@@ -172,6 +211,10 @@ public class Database extends EmbeddedDatabase
         {
             saveModQueueMessages((ModQueueObservable)obs);
         }
+        else if (obs instanceof RedditThreadObservable)
+        {
+            saveThreadComments((RedditThreadObservable)obs);
+        }
     }
 
     public void saveModQueueMessages(ModQueueObservable queue)
@@ -186,6 +229,25 @@ public class Database extends EmbeddedDatabase
             insert().into("ModQueueMessage")
                     .set("name", msg)
                     .set("subreddit_id", queue.getDbId())
+                    .unprepared()
+                    .execute(true);
+        }
+
+        commit();
+    }
+
+    public void saveThreadComments(RedditThreadObservable thread)
+    {
+        delete().from("ThreadComment")
+                .where("thread_id").equal(thread.getDbId())
+                .unprepared()
+                .execute(true);
+
+        for (var com : thread.getComments())
+        {
+            insert().into("ThreadComment")
+                    .set("name", com)
+                    .set("thread_id", thread.getDbId())
                     .unprepared()
                     .execute(true);
         }

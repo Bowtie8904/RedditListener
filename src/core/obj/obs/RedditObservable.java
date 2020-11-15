@@ -54,12 +54,18 @@ public abstract class RedditObservable
         return notifications;
     }
 
+    protected JSONArray getChildrenArray(JSONObject json)
+    {
+        var data = json.getJSONObject("data");
+        var children = data.getJSONArray("children");
+        return children;
+    }
+
     public void parseNewNotifications(JSONObject json)
     {
         try
         {
-            var data = json.getJSONObject("data");
-            var children = data.getJSONArray("children");
+            var children = getChildrenArray(json);
             long lastTimestamp = System.currentTimeMillis();
             List<RedditNotification> notifications = extractNotifications(children);
 

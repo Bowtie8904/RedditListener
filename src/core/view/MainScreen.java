@@ -27,10 +27,7 @@ import bt.gui.fx.util.ButtonHandling;
 import core.config.css.ButtonCss;
 import core.config.css.TextFieldCss;
 import core.obj.*;
-import core.obj.obs.ModQueueObservable;
-import core.obj.obs.RedditObservable;
-import core.obj.obs.RedditUserObservable;
-import core.obj.obs.SubredditObservable;
+import core.obj.obs.*;
 import core.view.comp.ObservableListCell;
 import core.web.RedditApplication;
 import javafx.application.HostServices;
@@ -50,7 +47,7 @@ import javafx.stage.Stage;
 @FxStyleClass(TextFieldCss.class)
 public class MainScreen extends DefaultFxSystemTrayScreen
 {
-    public static final String TEXTFIELD_REGEX = "[-_a-zA-Z0-9]{1,40}";
+    public static final String TEXTFIELD_REGEX = ".{1,200}";
 
     @FxmlElement
     @FxHandler(type = FxOnMouseClicked.class, method = "onListClicked")
@@ -142,6 +139,9 @@ public class MainScreen extends DefaultFxSystemTrayScreen
             case "/mod/":
                 this.observableManager.addObservable(new ModQueueObservable(this.textField.getText()));
                 break;
+            case "/thread/":
+                this.observableManager.addObservable(RedditThreadObservable.newFor(this.textField.getText()));
+                break;
         }
 
         this.saveButton.setDisable(true);
@@ -207,7 +207,7 @@ public class MainScreen extends DefaultFxSystemTrayScreen
     @Override
     protected void prepareScreen()
     {
-        this.kindDropDown.setItems(FXCollections.observableArrayList("/r/", "/u/", "/mod/"));
+        this.kindDropDown.setItems(FXCollections.observableArrayList("/r/", "/u/", "/mod/", "/thread/"));
         this.kindDropDown.getSelectionModel().select(0);
 
         RedditApplication.remainingRateLimit.addListener((obs, ol, ne) ->
