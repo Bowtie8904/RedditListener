@@ -20,6 +20,8 @@ public class RedditThreadObservable extends RedditObservable
     private static final Pattern idPattern = Pattern.compile("/comments/(.*?)/");
     private static final Pattern namePattern = Pattern.compile("/comments/.*?/(.*?)/");
 
+    private static final int MAX_TITLE_LENGTH = 28;
+
     private String id;
     private String subreddit;
     private Set<String> comments;
@@ -31,9 +33,9 @@ public class RedditThreadObservable extends RedditObservable
         matcher.find();
         String name = matcher.group(1).replace("_", " ");
 
-        if (name.length() > 10)
+        if (name.length() > MAX_TITLE_LENGTH)
         {
-            name = name.substring(0, 28) + "...";
+            name = name.substring(0, MAX_TITLE_LENGTH) + "...";
         }
 
         matcher = idPattern.matcher(link);
