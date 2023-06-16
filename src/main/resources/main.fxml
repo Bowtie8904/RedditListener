@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="486.0" prefWidth="296.0" xmlns="http://javafx.com/javafx/16"
+            xmlns:fx="http://javafx.com/fxml/1">
+    <bottom>
+        <BorderPane BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets bottom="5.0" top="5.0"/>
+            </BorderPane.margin>
+            <bottom>
+                <Label fx:id="rateLimitLabel" BorderPane.alignment="CENTER"/>
+            </bottom>
+        </BorderPane>
+    </bottom>
+    <top>
+        <BorderPane prefHeight="36.0" prefWidth="296.0" BorderPane.alignment="CENTER">
+            <right>
+                <Button fx:id="saveButton" disable="true" text="Save" BorderPane.alignment="CENTER">
+                    <BorderPane.margin>
+                        <Insets left="5.0" right="5.0"/>
+                    </BorderPane.margin>
+                </Button>
+            </right>
+            <left>
+                <ComboBox fx:id="kindDropDown" BorderPane.alignment="CENTER"/>
+            </left>
+            <center>
+                <TextField fx:id="textField" BorderPane.alignment="CENTER"/>
+            </center>
+        </BorderPane>
+    </top>
+    <center>
+        <ScrollPane fitToHeight="true" fitToWidth="true" focusTraversable="false" hbarPolicy="NEVER" BorderPane.alignment="CENTER">
+            <content>
+                <ListView fx:id="list"/>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

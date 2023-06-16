@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <clientId>yourId</clientId>
+    <clientSecret>yourSecret</clientSecret>
+    <userAgent>windows:v1.0.0</userAgent>
+    <redirectUri>http://localhost:13980/auth</redirectUri>
+    <threadsPerRequest>50</threadsPerRequest>
+    <requestInterval>10000</requestInterval>
+    <hiddenRequestInterval>120000</hiddenRequestInterval>
+    <hiddenThreadLifetimeHours>24</hiddenThreadLifetimeHours>
+    <trackThreadComments>false</trackThreadComments>
+    <popUpX>50</popUpX>
+    <popUpY>700</popUpY>
+</configuration>

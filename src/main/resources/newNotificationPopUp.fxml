@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+
+<?import javafx.scene.control.Button?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="66.0" prefWidth="274.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <Hyperlink fx:id="subLink" BorderPane.alignment="TOP_LEFT">
+         <font>
+            <Font size="9.0" />
+         </font>
+         <BorderPane.margin>
+            <Insets left="5.0" top="5.0" />
+         </BorderPane.margin>
+      </Hyperlink>
+   </top>
+   <center>
+      <Hyperlink fx:id="titleLink" prefHeight="88.0" prefWidth="295.0" BorderPane.alignment="CENTER_LEFT">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <BorderPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" />
+         </BorderPane.margin>
+      </Hyperlink>
+   </center>
+   <right>
+      <Button fx:id="closeButton" alignment="TOP_CENTER" text="Close" BorderPane.alignment="TOP_CENTER">
+         <BorderPane.margin>
+            <Insets left="5.0" right="5.0" />
+         </BorderPane.margin>
+      </Button>
+   </right>
+</BorderPane>
